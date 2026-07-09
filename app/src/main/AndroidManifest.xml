@@ -1,0 +1,8 @@
+<manifest package="com.vend.pulseautocolor"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:label="Pulse Auto Color"
+        android:description="@string/app_description" />
+
+</manifest>

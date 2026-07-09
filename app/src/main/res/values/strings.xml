@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">PulseAutoColor</string>
+    <string name="app_description">Auto color from album art</string>
+</resources>
