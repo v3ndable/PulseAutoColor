@@ -42,6 +42,7 @@ public class Module extends XposedModule {
             logMsg("System UI loaded, hooking media...");
             // onPackageLoaded is only called on API 29+, so getDefaultClassLoader is available
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                logMsg("1...");
                 hookMedia(param.getDefaultClassLoader());
             }
         }
@@ -49,11 +50,14 @@ public class Module extends XposedModule {
 
     private void hookMedia(ClassLoader classLoader) {
         try {
+            logMsg("2...");
             Class<?> mediaManager = classLoader.loadClass("com.android.systemui.statusbar.NotificationMediaManager");
-
+            logMsg("3...");
             // In LibXposed 100+, we find and hook methods individually
             for (Method method : mediaManager.getDeclaredMethods()) {
-                if (method.getName().equals("updateMediaMetaData")) {
+                logMsg("4...");
+                if (method.getName().equals("dispatchUpdateMediaMetaData")) {
+                    logMsg("5...");
                     hook(method).intercept(new MediaHooker());
                 }
             }
@@ -67,11 +71,13 @@ public class Module extends XposedModule {
         public Object intercept(@NonNull XposedInterface.Chain chain) throws Throwable {
             // Execute the original method first (equivalent to AfterHooker)
             Object result = chain.proceed();
+            logMsg("6...");
 
             try {
                 // For NotificationMediaManager, we get the metadata from the instance
                 Object mediaManager = chain.getThisObject();
                 Bitmap bitmap = null;
+                logMsg("7...");
 
                 try {
                     // Try to get mMediaMetadata field which is common in NotificationMediaManager
@@ -99,6 +105,8 @@ public class Module extends XposedModule {
                 // Extract dominant color using the Palette API
                 Palette palette = Palette.from(bitmap).generate();
                 int color = palette.getDominantColor(0xFFFFFFFF);
+
+                logMsg("8...");
 
                 // Update system settings with the new color
                 ContentResolver cr = context.getContentResolver();
