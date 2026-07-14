@@ -21,3 +21,7 @@ Compatibility with other ROMs has not been tested.
 4. Extracts the dominant color using the Android Palette API.
 5. Writes the color to `Settings.Secure.pulse_color_user`.
 6. Evolution X updates the Pulse visualizer with the new color.
+
+## License
+
+GPL-3.0 — see [LICENSE](LICENSE) for details.
