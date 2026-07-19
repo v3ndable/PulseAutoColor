@@ -24,9 +24,10 @@ public class Module extends XposedModule {
     private Context systemContext;
     private static final String TAG = "PulseAutoColor";
 
-    public Module(@NonNull XposedInterface base, @NonNull XposedModuleInterface.ModuleLoadedParam param) {
-        super();
-        log(Log.INFO, TAG, "framework: $frameworkName($frameworkVersionCode) API $apiVersion");
+    @Override
+    public void onModuleLoaded(@NonNull ModuleLoadedParam param) {
+        super.onModuleLoaded(param);
+        log(Log.INFO, TAG, "framework: " + getFrameworkName() + "(" + getFrameworkVersionCode() + ") API " + getApiVersion());
         Log.i(TAG, "PulseAutoColor loaded");
     }
 
@@ -37,31 +38,25 @@ public class Module extends XposedModule {
     @Override
     public void onPackageLoaded(@NonNull XposedModuleInterface.PackageLoadedParam param) {
         Log.i(TAG, ">>> onPackageLoaded: " + param.getPackageName());
-        super.onPackageLoaded(param);
         // We only care about SystemUI for this hook
         if (param.getPackageName().equals("com.android.systemui")) {
             logMsg("System UI loaded, hooking media...");
-            // onPackageLoaded is only called on API 29+, so getDefaultClassLoader is available
-            logMsg("1...");
             hookMedia(param.getDefaultClassLoader());
         }
     }
 
     private void hookMedia(ClassLoader classLoader) {
         try {
-            logMsg("2...");
             Class<?> mediaManager = classLoader.loadClass("com.android.systemui.statusbar.NotificationMediaManager");
-            logMsg("3...");
             // In LibXposed 100+, we find and hook methods individually
             for (Method method : mediaManager.getDeclaredMethods()) {
-                logMsg("4...");
                 if (method.getName().equals("dispatchUpdateMediaMetaData")) {
-                    logMsg("5...");
+                    logMsg("Found dispatchUpdateMediaMetaData, hooking...");
                     hook(method).intercept(new MediaHooker());
                 }
             }
         } catch (Throwable t) {
-            Log.i(TAG, "Hook failed: " + t);
+            Log.e(TAG, "Hook failed: ", t);
         }
     }
 
@@ -70,13 +65,13 @@ public class Module extends XposedModule {
         public Object intercept(@NonNull XposedInterface.Chain chain) throws Throwable {
             // Execute the original method first (equivalent to AfterHooker)
             Object result = chain.proceed();
-            logMsg("6...");
 
             try {
                 // For NotificationMediaManager, we get the metadata from the instance
                 Object mediaManager = chain.getThisObject();
+                if (mediaManager == null) return result;
+
                 Bitmap bitmap = null;
-                logMsg("7...");
 
                 try {
                     // Try to get mMediaMetadata field which is common in NotificationMediaManager
@@ -93,28 +88,32 @@ public class Module extends XposedModule {
                         }
                     }
                 } catch (Exception e) {
-                    logMsg("Could not get bitmap from metadata: " + e);
+                    logMsg("Could not get bitmap from metadata: " + e.getMessage());
                 }
 
-                if (bitmap == null) return result;
+                if (bitmap == null) {
+                    logMsg("No bitmap found in metadata");
+                    return result;
+                }
 
                 Context context = getSystemContext();
-                if (context == null) return result;
+                if (context == null) {
+                    logMsg("System context is null, cannot update color");
+                    return result;
+                }
 
                 // Extract dominant color using the Palette API
                 Palette palette = Palette.from(bitmap).generate();
                 int color = palette.getDominantColor(0xFFFFFFFF);
 
-                logMsg("8...");
-
                 // Update system settings with the new color
                 ContentResolver cr = context.getContentResolver();
                 Settings.Secure.putInt(cr, "pulse_color_user", color);
 
-                logMsg("Set color: " + Integer.toHexString(color));
+                logMsg("Set color: #" + Integer.toHexString(color));
 
             } catch (Throwable t) {
-                Log.i(TAG, "Error in hook: " + t);
+                Log.e(TAG, "Error in hook: ", t);
             }
             return result;
         }
