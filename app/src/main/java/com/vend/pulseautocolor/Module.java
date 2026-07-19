@@ -3,9 +3,6 @@ package com.vend.pulseautocolor;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -28,7 +25,6 @@ public class Module extends XposedModule {
     public void onModuleLoaded(@NonNull ModuleLoadedParam param) {
         super.onModuleLoaded(param);
         log(Log.INFO, TAG, "framework: " + getFrameworkName() + "(" + getFrameworkVersionCode() + ") API " + getApiVersion());
-        Log.i(TAG, "PulseAutoColor loaded");
     }
 
     private void logMsg(String msg) {
@@ -37,10 +33,7 @@ public class Module extends XposedModule {
 
     @Override
     public void onPackageLoaded(@NonNull XposedModuleInterface.PackageLoadedParam param) {
-        Log.i(TAG, ">>> onPackageLoaded: " + param.getPackageName());
-        // We only care about SystemUI for this hook
         if (param.getPackageName().equals("com.android.systemui")) {
-            logMsg("System UI loaded, hooking media...");
             hookMedia(param.getDefaultClassLoader());
         }
     }
@@ -48,10 +41,8 @@ public class Module extends XposedModule {
     private void hookMedia(ClassLoader classLoader) {
         try {
             Class<?> mediaManager = classLoader.loadClass("com.android.systemui.statusbar.NotificationMediaManager");
-            // In LibXposed 100+, we find and hook methods individually
             for (Method method : mediaManager.getDeclaredMethods()) {
                 if (method.getName().equals("dispatchUpdateMediaMetaData")) {
-                    logMsg("Found dispatchUpdateMediaMetaData, hooking...");
                     hook(method).intercept(new MediaHooker());
                 }
             }
@@ -63,24 +54,20 @@ public class Module extends XposedModule {
     class MediaHooker implements XposedInterface.Hooker {
         @Override
         public Object intercept(@NonNull XposedInterface.Chain chain) throws Throwable {
-            // Execute the original method first (equivalent to AfterHooker)
             Object result = chain.proceed();
 
             try {
-                // For NotificationMediaManager, we get the metadata from the instance
                 Object mediaManager = chain.getThisObject();
                 if (mediaManager == null) return result;
 
                 Bitmap bitmap = null;
 
                 try {
-                    // Try to get mMediaMetadata field which is common in NotificationMediaManager
                     Field field = mediaManager.getClass().getDeclaredField("mMediaMetadata");
                     field.setAccessible(true);
                     Object metadata = field.get(mediaManager);
 
                     if (metadata != null) {
-                        // Extract bitmap from MediaMetadata using standard keys
                         Method getBitmap = metadata.getClass().getMethod("getBitmap", String.class);
                         bitmap = (Bitmap) getBitmap.invoke(metadata, "android.media.metadata.ART");
                         if (bitmap == null) {
@@ -102,11 +89,9 @@ public class Module extends XposedModule {
                     return result;
                 }
 
-                // Extract dominant color using the Palette API
                 Palette palette = Palette.from(bitmap).generate();
                 int color = palette.getDominantColor(0xFFFFFFFF);
 
-                // Update system settings with the new color
                 ContentResolver cr = context.getContentResolver();
                 Settings.Secure.putInt(cr, "pulse_color_user", color);
 
@@ -122,7 +107,6 @@ public class Module extends XposedModule {
     private Context getSystemContext() {
         if (systemContext == null) {
             try {
-                // Standard reflection to get the system context
                 Class<?> activityThread = Class.forName("android.app.ActivityThread");
                 Method currentApplication = activityThread.getDeclaredMethod("currentApplication");
                 systemContext = (Context) currentApplication.invoke(null);
@@ -131,23 +115,5 @@ public class Module extends XposedModule {
             }
         }
         return systemContext;
-    }
-
-    private Bitmap drawableToBitmap(Drawable drawable) {
-        try {
-            Bitmap bitmap = Bitmap.createBitmap(
-                    drawable.getIntrinsicWidth(),
-                    drawable.getIntrinsicHeight(),
-                    Bitmap.Config.ARGB_8888
-            );
-
-            Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            drawable.draw(canvas);
-
-            return bitmap;
-        } catch (Throwable t) {
-            return null;
-        }
     }
 }
