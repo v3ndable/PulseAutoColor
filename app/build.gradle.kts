@@ -1,40 +1,58 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.agp.app)
 }
 
 android {
     namespace = "com.vend.pulseautocolor"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
+    buildToolsVersion = "37.0.0"
 
     defaultConfig {
         applicationId = "com.vend.pulseautocolor"
-        minSdk = 28
-        targetSdk = 36
+        minSdk = 29
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles("proguard-rules.pro")
+            signingConfig = signingConfigs["debug"]
         }
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    packaging {
+        resources {
+            merges += "META-INF/xposed/*"
+            excludes += "**"
+        }
+    }
+
+    lint {
+        abortOnError = true
+        checkReleaseBuilds = false
     }
 }
 
+dependencies {
+    compileOnly(libs.libxposed.api)
+    implementation(libs.libxposed.service)
+    implementation("androidx.palette:palette:1.0.0")
+}
+
+/*
 dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -43,4 +61,4 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     compileOnly("io.github.libxposed:api:102.0.0")
     implementation("androidx.palette:palette:1.0.0")
-}
+}*/

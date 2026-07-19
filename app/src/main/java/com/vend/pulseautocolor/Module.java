@@ -26,6 +26,7 @@ public class Module extends XposedModule {
 
     public Module(@NonNull XposedInterface base, @NonNull XposedModuleInterface.ModuleLoadedParam param) {
         super();
+        log(Log.INFO, TAG, "framework: $frameworkName($frameworkVersionCode) API $apiVersion");
         Log.i(TAG, "PulseAutoColor loaded");
     }
 
@@ -41,10 +42,8 @@ public class Module extends XposedModule {
         if (param.getPackageName().equals("com.android.systemui")) {
             logMsg("System UI loaded, hooking media...");
             // onPackageLoaded is only called on API 29+, so getDefaultClassLoader is available
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                logMsg("1...");
-                hookMedia(param.getDefaultClassLoader());
-            }
+            logMsg("1...");
+            hookMedia(param.getDefaultClassLoader());
         }
     }
 
