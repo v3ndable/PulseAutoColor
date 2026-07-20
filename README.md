@@ -10,6 +10,9 @@
 
 An LSPosed module that automatically changes Evolution X Pulse visualizer colors based on the currently playing album artwork.
 
+<img src="screenshots/pulse-red.png" width="300">
+<img src="screenshots/pulse-blue.png" width="300">
+
 </div>
 
 <details>
