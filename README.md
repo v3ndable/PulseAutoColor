@@ -1,9 +1,11 @@
 <a id="readme-top"></a>
 
 [![GitHub Release][release-shield]][release-url]
+<img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android 10+">
+<img src="https://img.shields.io/badge/libxposed-API_102-ff69b4?style=for-the-badge" alt="libxposed API 102">
 [![Issues][issues-shield]][issues-url]
 [![License][license-shield]][license-url]
-
+  
 <div align="center">
 
 # PulseAutoColor
