@@ -29,33 +29,33 @@ public class MediaHooker implements XposedInterface.Hooker {
     @Override
     public Object intercept(@NonNull XposedInterface.Chain chain) throws Throwable {
         Object result = chain.proceed();
-        
         try {
-            processMediaUpdate(chain.getThisObject());
+            handleMediaMetadataChange(chain.getThisObject());
         } catch (Exception e) {
-            module.logException("Error processing media update", e);
+            module.logException("Failed to process media metadata change", e);
         }
-        
         return result;
     }
 
-    private void processMediaUpdate(@Nullable Object mediaManager) {
+    private void handleMediaMetadataChange(@Nullable Object mediaManager) {
         if (mediaManager == null) return;
 
-        Bitmap bitmap = extractBitmap(mediaManager);
-        if (bitmap == null) {
+        Bitmap albumArt = extractAlbumArt(mediaManager);
+        if (albumArt == null) {
             module.logInfo("No album art found in metadata");
             return;
         }
 
-        Context context = module.getSystemContext();
-        if (context == null) return;
+        int dominantColor = extractDominantColor(albumArt);
 
-        updatePulseColor(context, bitmap);
+        Context context = module.getSystemContext();
+        if (context != null) {
+            applyColorToSystemSettings(context, dominantColor);
+        }
     }
 
     @Nullable
-    private Bitmap extractBitmap(Object mediaManager) {
+    private Bitmap extractAlbumArt(Object mediaManager) {
         try {
             Field field = mediaManager.getClass().getDeclaredField("mMediaMetadata");
             field.setAccessible(true);
@@ -64,27 +64,29 @@ public class MediaHooker implements XposedInterface.Hooker {
             if (metadata == null) return null;
 
             Method getBitmap = metadata.getClass().getMethod("getBitmap", String.class);
-            
-            // Try ART first, then ALBUM_ART
+
             Bitmap bitmap = (Bitmap) getBitmap.invoke(metadata, METADATA_KEY_ART);
             if (bitmap == null) {
                 bitmap = (Bitmap) getBitmap.invoke(metadata, METADATA_KEY_ALBUM_ART);
             }
             return bitmap;
         } catch (Exception e) {
-            module.logException("Reflection failed to get bitmap", e);
+            module.logException("Reflection failed to extract bitmap", e);
             return null;
         }
     }
 
-    private void updatePulseColor(Context context, Bitmap bitmap) {
+    private int extractDominantColor(Bitmap bitmap) {
         Palette palette = Palette.from(bitmap).generate();
-        int color = palette.getDominantColor(0xFFFFFFFF);
+        return palette.getDominantColor(0xFFFFFFFF);
+    }
 
+    private void applyColorToSystemSettings(Context context, int color) {
         ContentResolver cr = context.getContentResolver();
+
         Settings.Secure.putInt(cr, SETTING_PULSE_COLOR, color);
         Settings.System.putInt(cr, SETTING_BATTERY_BAR_COLOR, color);
-        
-        module.logInfo("Updated colors to: #" + Integer.toHexString(color));
+
+        module.logInfo("System colors updated to: #" + Integer.toHexString(color));
     }
 }
