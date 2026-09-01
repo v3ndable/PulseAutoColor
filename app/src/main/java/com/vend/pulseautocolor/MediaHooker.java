@@ -18,6 +18,7 @@ public class MediaHooker implements XposedInterface.Hooker {
     private static final String METADATA_KEY_ART = "android.media.metadata.ART";
     private static final String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
     private static final String SETTING_PULSE_COLOR = "pulse_color_user";
+    private static final String SETTING_BATTERY_BAR_COLOR = "statusbar_battery_bar_color";
 
     private final Module module;
 
@@ -82,7 +83,8 @@ public class MediaHooker implements XposedInterface.Hooker {
 
         ContentResolver cr = context.getContentResolver();
         Settings.Secure.putInt(cr, SETTING_PULSE_COLOR, color);
+        Settings.System.putInt(cr, SETTING_BATTERY_BAR_COLOR, color);
         
-        module.logInfo("Updated color to: #" + Integer.toHexString(color));
+        module.logInfo("Updated colors to: #" + Integer.toHexString(color));
     }
 }
