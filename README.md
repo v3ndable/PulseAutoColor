@@ -64,7 +64,7 @@ Download the latest version from the GitHub Releases page:
 ## Installation
 
 1. Download the latest PulseAutoColor module from the releases page.
-2. Enable the module in LSPosed Manager and grant `com.android.systemui` permissions.
+2. Enable the module in Vector or LSPosed Manager and grant `com.android.systemui` permissions.
 3. Make sure you have enabled Pulse in Evolver and set the Color option to Custom.
 4. Reboot your device for the changes to take effect.
 
