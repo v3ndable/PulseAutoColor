@@ -10,7 +10,7 @@
 
 # PulseAutoColor
 
-An LSPosed module that automatically changes Evolution X Pulse visualizer colors based on the currently playing album artwork.
+An LSPosed module that automatically changes Evolution X Pulse and Battery Bar colors based on the currently playing album artwork.
 
 <img src="screenshots/pulse-red.png" width="300">
 <img src="screenshots/pulse-blue.png" width="300">
@@ -31,7 +31,9 @@ An LSPosed module that automatically changes Evolution X Pulse visualizer colors
 
 ## About
 
-PulseAutoColor is an advanced LSPosed module designed for Evolution X users who want a more dynamic and personalized experience with their Pulse visualizer. The module hooks into the system's notification media manager to detect when music changes and automatically extracts the dominant color from the album artwork, applying it to the Pulse visualizer in real-time.
+PulseAutoColor is an LSPosed module designed for Evolution X users who want a more dynamic and personalized system UI. The module hooks into the system's notification media manager to detect when music changes and automatically extracts the dominant color from the album artwork.
+
+The extracted color is then applied to both the Pulse visualizer and the Battery Bar, creating a consistent color theme throughout the system UI that changes automatically with your music.
 
 This creates a seamless, visually immersive experience where your music's color palette is reflected in the system UI. Supports **LibXposed API 102** and requires root access via a compatible Xposed framework.
 
@@ -49,8 +51,8 @@ This creates a seamless, visually immersive experience where your music's color 
 2. Detects media metadata updates and album artwork changes
 3. Retrieves the current album artwork from media notifications
 4. Extracts the dominant color using the Android Palette API
-5. Writes the color to `Settings.Secure.pulse_color_user`
-6. Evolution X updates the Pulse visualizer with the new color in real time
+5. Writes the color to `Settings.Secure.pulse_color_user` and `Settings.System.statusbar_battery_bar_color`
+6. Evolution X updates the Pulse visualizer and Battery Bar with the new color in real time
 
 ## Downloads
 
