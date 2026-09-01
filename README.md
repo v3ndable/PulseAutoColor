@@ -55,10 +55,11 @@ This creates a seamless, visually immersive experience where your music's color 
 6. Evolution X updates the Pulse visualizer and Battery Bar with the new color in real time
 
 ## Downloads
+Download the latest version from the GitHub Releases page:
 
-Download the latest module from the GitHub Releases page:
+**Latest Release:** [v1.1.0](../../releases/tag/v1.1.0) — Includes automatic Battery Bar color support
 
-[Latest Release](../../releases/latest)
+**Previous Release:** [v1.0.0](../../releases/tag/v1.0.0) — Pulse color support only
 
 ## Installation
 
