@@ -68,9 +68,9 @@ Download the latest module from the GitHub Releases page:
 4. Reboot your device for the changes to take effect.
 
 > [!NOTE]
-> This module is designed for Evolution X. Compatibility with other ROMs has not been tested and is not guaranteed. Ensure LSPosed with API 102 is properly installed and Pulse visualizer is enabled in your system settings.
+> This module is designed for Evolution X. Compatibility with other ROMs has not been tested and is not guaranteed. Ensure LSPosed or Vector with API 102 is properly installed and Pulse visualizer is enabled in your system settings.
 > 
-> **After rebooting your device, the Pulse visualizer may take some time to become active again.** This is normal behavior and is not related to the module. To check if the module is working, play music with a different album cover and verify that the Pulse color setting changes automatically.
+> **After rebooting your device, the Pulse visualizer may only start working after changing the system volume.** This is normal behavior and is not related to the module. To verify that the module is working, play music with a different album cover and check whether the Pulse and Battery Bar colors change automatically.
 
 ## License
 
